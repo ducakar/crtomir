@@ -1,0 +1,18 @@
+/*
+ * Copyright © 2014 Davorin Učakar. All rights reserved.
+ */
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #404040;
+}
+
+div#fpsCounter
+{
+  position: absolute;
+  width: 100%;
+  text-align: right;
+  color: white;
+  pointer-events: none;
+}
