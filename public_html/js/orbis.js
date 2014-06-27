@@ -28,6 +28,10 @@ var Entity = {
     this.px = px;
     this.py = py;
   },
+  realign: function() {
+    this.x = this.px * Field.SIZE + (this.OFFSET_X || 0);
+    this.y = this.py * Field.SIZE + (this.OFFSET_Y || 0);
+  },
   position: function(px, py) {
     var fieldFlags = orbis.fieldFlags;
     var fieldEnts = orbis[this.FIELD];
@@ -39,9 +43,10 @@ var Entity = {
 
     this.px = px;
     this.py = py;
-    this.x = px * Field.SIZE + (this.OFFSET_X || 0);
-    this.y = py * Field.SIZE + (this.OFFSET_Y || 0);
+    this.realign();
     this.visible = true;
+
+    orbis.layer[this.ARRAY].addChild(this);
   },
   unposition: function() {
     var fieldFlags = orbis.fieldFlags;
@@ -57,6 +62,8 @@ var Entity = {
     this.x = 0;
     this.y = 0;
     this.visible = false;
+
+    orbis.layer[this.ARRAY].removeChild(this);
   },
   init: function(image) {
     this.visible = false;
@@ -83,6 +90,7 @@ var Char = Class(new enchant.Sprite(Field.SIZE * 2, Field.SIZE * 2), {
   py: -1,
   array: null,
   moveTo: Entity.moveTo,
+  realign: Entity.realign,
   position: Entity.position,
   unposition: Entity.unposition,
   init: Entity.init
@@ -95,6 +103,8 @@ var Item = Class(new enchant.Sprite(Field.SIZE, Field.SIZE), {
   px: -1,
   py: -1,
   array: null,
+  moveTo: Entity.moveTo,
+  realign: Entity.realign,
   position: Entity.position,
   unposition: Entity.unposition,
   init: Entity.init
@@ -110,8 +120,15 @@ var Orbis = Class(null, {
   fieldChars: null,
   fieldItems: null,
   fieldDevices: null,
-  backgroundMap: null,
-  foregroundMap: null,
+  map: {
+    background: null,
+    foreground: null
+  },
+  layer: {
+    chars: null,
+    items: null,
+    devices: null
+  },
   isSolid: function(px, py) {
     return this.fieldFlags[px][py] & Field.SOLID;
   },
@@ -149,11 +166,16 @@ var Orbis = Class(null, {
       }
     }
 
-    this.backgroundMap = new Map(Field.SIZE, Field.SIZE);
-    this.backgroundMap.image = tilesImage;
-    this.backgroundMap.loadData.apply(this.backgroundMap, layers.background);
-    this.foregroundMap = new Map(Field.SIZE, Field.SIZE);
-    this.foregroundMap.image = tilesImage;
-    this.foregroundMap.loadData.apply(this.foregroundMap, layers.foreground);
+    this.map.background = new enchant.Map(Field.SIZE, Field.SIZE);
+    this.map.background.image = tilesImage;
+    this.map.background.loadData.apply(this.map.background, layers.background);
+
+    this.map.foreground = new enchant.Map(Field.SIZE, Field.SIZE);
+    this.map.foreground.image = tilesImage;
+    this.map.foreground.loadData.apply(this.map.foreground, layers.foreground);
+
+    this.layer.chars = new enchant.Group();
+    this.layer.items = new enchant.Group();
+    this.layer.devices = new enchant.Group();
   }
 });

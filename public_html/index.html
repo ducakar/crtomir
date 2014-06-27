@@ -18,7 +18,6 @@
       enchant();
 
       var game = null;
-      var enableTouchInterface = false;
 
       window.onload = function() {
         game = new enchant.Core(480, 320);
@@ -29,26 +28,22 @@
         game.keybind(65, "left");
         game.keybind(68, "right");
         game.keybind(32, "action");
-
-        if (enableTouchInterface) {
-          game.rootScene.addEventListener(Event.TOUCH_START, function() {
-            game.changeButtonState("action", true);
-          });
-          game.rootScene.addEventListener(Event.TOUCH_END, function() {
-            game.changeButtonState("action", false);
-          });
-        }
+        game.rootScene.addEventListener(Event.TOUCH_START, function() {
+          game.changeButtonState("action", true);
+        });
+        game.rootScene.addEventListener(Event.TOUCH_END, function() {
+          game.changeButtonState("action", false);
+        });
 
         game.onload = function() {
           orbis = new Orbis(game.assets["data/map1.png"], LAYERS);
 
-          var player = new Char(game.assets["data/chara5.png"]);
-          player.position(7, 7);
-
           var stage = new enchant.Group();
-          stage.addChild(orbis.backgroundMap);
-          stage.addChild(player);
-          stage.addChild(orbis.foregroundMap);
+          stage.addChild(orbis.map.background);
+          stage.addChild(orbis.layer.devices);
+          stage.addChild(orbis.layer.items);
+          stage.addChild(orbis.layer.chars);
+          stage.addChild(orbis.map.foreground);
 
           var lifeLabel = new enchant.ui.LifeLabel(4, 4, 10);
           lifeLabel.label.text = '';
@@ -68,10 +63,10 @@
             stage.y = y;
           });
 
+          var player = new Char(game.assets["data/chara5.png"]);
+          player.position(7, 7);
           player.controller = new PlayerController(player);
-          player.controller.destroy();
-          delete player.controller;
-          player.controller = new PlayerController(player);
+          player.controller.enable(true);
         };
         game.start();
       };
