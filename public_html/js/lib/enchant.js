@@ -823,11 +823,10 @@ enchant.EventTarget = enchant.Class.create({
      */
     addEventListener: function(type, listener) {
         var listeners = this._listeners[type];
-        if (listeners == null) {
+        if (!listeners) {
             this._listeners[type] = [listener];
         } else if (listeners.indexOf(listener) === -1) {
             listeners.unshift(listener);
-
         }
     },
     /**
@@ -846,7 +845,7 @@ enchant.EventTarget = enchant.Class.create({
      */
     removeEventListener: function(type, listener) {
         var listeners = this._listeners[type];
-        if (listeners != null) {
+        if (listeners) {
             var i = listeners.indexOf(listener);
             if (i !== -1) {
                 listeners.splice(i, 1);
@@ -859,7 +858,7 @@ enchant.EventTarget = enchant.Class.create({
      * @param {String} type Type of the events.
      */
     clearEventListener: function(type) {
-        if (type != null) {
+        if (type) {
             delete this._listeners[type];
         } else {
             this._listeners = {};
@@ -873,11 +872,11 @@ enchant.EventTarget = enchant.Class.create({
         e.target = this;
         e.localX = e.x - this._offsetX;
         e.localY = e.y - this._offsetY;
-        if (this['on' + e.type] != null){
+        if (this['on' + e.type]){
             this['on' + e.type](e);
         }
         var listeners = this._listeners[e.type];
-        if (listeners != null) {
+        if (listeners) {
             listeners = listeners.slice();
             for (var i = 0, len = listeners.length; i < len; i++) {
                 listeners[i].call(this, e);
@@ -1523,6 +1522,7 @@ enchant.EventTarget = enchant.Class.create({
             var elapsed = e.elapsed = now - this.currentTime;
 
             this._actualFps = elapsed > 0 ? (1000 / elapsed) : 0;
+            this.currentTime = now;
 
             var nodes = this.currentScene.childNodes.slice();
             var push = Array.prototype.push;
@@ -1541,8 +1541,9 @@ enchant.EventTarget = enchant.Class.create({
 
             this.dispatchEvent(new enchant.Event('exitframe'));
             this.frame++;
-            this.currentTime = window.getTime();
-            this._requestNextFrame(now + 1000 / this.fps - this.currentTime);
+
+            now = window.getTime();
+            this._requestNextFrame(this.currentTime + 1000 / this.fps - now);
         },
         getTime: function() {
             return window.getTime();
@@ -2228,77 +2229,77 @@ enchant.Node = enchant.Class.create(enchant.EventTarget, {
     }
 });
 
-var _intersectBetweenClassAndInstance = function(Class, instance) {
-    var ret = [];
-    var c;
-    for (var i = 0, l = Class.collection.length; i < l; i++) {
-        c = Class.collection[i];
-        if (instance._intersectOne(c)) {
-            ret.push(c);
-        }
-    }
-    return ret;
-};
-
-var _intersectBetweenClassAndClass = function(Class1, Class2) {
-    var ret = [];
-    var c1, c2;
-    for (var i = 0, l = Class1.collection.length; i < l; i++) {
-        c1 = Class1.collection[i];
-        for (var j = 0, ll = Class2.collection.length; j < ll; j++) {
-            c2 = Class2.collection[j];
-            if (c1._intersectOne(c2)) {
-                ret.push([ c1, c2 ]);
-            }
-        }
-    }
-    return ret;
-};
-
-var _intersectStrictBetweenClassAndInstance = function(Class, instance) {
-    var ret = [];
-    var c;
-    for (var i = 0, l = Class.collection.length; i < l; i++) {
-        c = Class.collection[i];
-        if (instance._intersectStrictOne(c)) {
-            ret.push(c);
-        }
-    }
-    return ret;
-};
-
-var _intersectStrictBetweenClassAndClass = function(Class1, Class2) {
-    var ret = [];
-    var c1, c2;
-    for (var i = 0, l = Class1.collection.length; i < l; i++) {
-        c1 = Class1.collection[i];
-        for (var j = 0, ll = Class2.collection.length; j < ll; j++) {
-            c2 = Class2.collection[j];
-            if (c1._intersectStrictOne(c2)) {
-                ret.push([ c1, c2 ]);
-            }
-        }
-    }
-    return ret;
-};
-
-var _staticIntersect = function(other) {
-    if (other instanceof enchant.Entity) {
-        return _intersectBetweenClassAndInstance(this, other);
-    } else if (typeof other === 'function' && other.collection) {
-        return _intersectBetweenClassAndClass(this, other);
-    }
-    return false;
-};
-
-var _staticIntersectStrict = function(other) {
-    if (other instanceof enchant.Entity) {
-        return _intersectStrictBetweenClassAndInstance(this, other);
-    } else if (typeof other === 'function' && other.collection) {
-        return _intersectStrictBetweenClassAndClass(this, other);
-    }
-    return false;
-};
+//var _intersectBetweenClassAndInstance = function(Class, instance) {
+//    var ret = [];
+//    var c;
+//    for (var i = 0, l = Class.collection.length; i < l; i++) {
+//        c = Class.collection[i];
+//        if (instance._intersectOne(c)) {
+//            ret.push(c);
+//        }
+//    }
+//    return ret;
+//};
+//
+//var _intersectBetweenClassAndClass = function(Class1, Class2) {
+//    var ret = [];
+//    var c1, c2;
+//    for (var i = 0, l = Class1.collection.length; i < l; i++) {
+//        c1 = Class1.collection[i];
+//        for (var j = 0, ll = Class2.collection.length; j < ll; j++) {
+//            c2 = Class2.collection[j];
+//            if (c1._intersectOne(c2)) {
+//                ret.push([ c1, c2 ]);
+//            }
+//        }
+//    }
+//    return ret;
+//};
+//
+//var _intersectStrictBetweenClassAndInstance = function(Class, instance) {
+//    var ret = [];
+//    var c;
+//    for (var i = 0, l = Class.collection.length; i < l; i++) {
+//        c = Class.collection[i];
+//        if (instance._intersectStrictOne(c)) {
+//            ret.push(c);
+//        }
+//    }
+//    return ret;
+//};
+//
+//var _intersectStrictBetweenClassAndClass = function(Class1, Class2) {
+//    var ret = [];
+//    var c1, c2;
+//    for (var i = 0, l = Class1.collection.length; i < l; i++) {
+//        c1 = Class1.collection[i];
+//        for (var j = 0, ll = Class2.collection.length; j < ll; j++) {
+//            c2 = Class2.collection[j];
+//            if (c1._intersectStrictOne(c2)) {
+//                ret.push([ c1, c2 ]);
+//            }
+//        }
+//    }
+//    return ret;
+//};
+//
+//var _staticIntersect = function(other) {
+//    if (other instanceof enchant.Entity) {
+//        return _intersectBetweenClassAndInstance(this, other);
+//    } else if (typeof other === 'function' && other.collection) {
+//        return _intersectBetweenClassAndClass(this, other);
+//    }
+//    return false;
+//};
+//
+//var _staticIntersectStrict = function(other) {
+//    if (other instanceof enchant.Entity) {
+//        return _intersectStrictBetweenClassAndInstance(this, other);
+//    } else if (typeof other === 'function' && other.collection) {
+//        return _intersectStrictBetweenClassAndClass(this, other);
+//    }
+//    return false;
+//};
 
 /**
  * @scope enchant.Entity.prototype
@@ -2312,7 +2313,7 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
      * @extends enchant.Node
      */
     initialize: function() {
-        var core = enchant.Core.instance;
+//        var core = enchant.Core.instance;
         enchant.Node.call(this);
 
         this._rotation = 0;
@@ -2349,31 +2350,31 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
          * Valid buttonModes are: left, right, up, down, a, b. 
          * @type String
          */
-        this.buttonMode = null;
+//        this.buttonMode = null;
         /**
          * Indicates if this Entity is being clicked.
          * Only works when {@link enchant.Entity.buttonMode} is set.
          * @type Boolean
          */
-        this.buttonPressed = false;
-        this.addEventListener('touchstart', function() {
-            if (!this.buttonMode) {
-                return;
-            }
-            this.buttonPressed = true;
-            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttondown'));
-            core.changeButtonState(this.buttonMode, true);
-        });
-        this.addEventListener('touchend', function() {
-            if (!this.buttonMode) {
-                return;
-            }
-            this.buttonPressed = false;
-            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttonup'));
-            core.changeButtonState(this.buttonMode, false);
-        });
-
-        this.enableCollection();
+//        this.buttonPressed = false;
+//        this.addEventListener('touchstart', function() {
+//            if (!this.buttonMode) {
+//                return;
+//            }
+//            this.buttonPressed = true;
+//            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttondown'));
+//            core.changeButtonState(this.buttonMode, true);
+//        });
+//        this.addEventListener('touchend', function() {
+//            if (!this.buttonMode) {
+//                return;
+//            }
+//            this.buttonPressed = false;
+//            this.dispatchEvent(new enchant.Event(this.buttonMode + 'buttonup'));
+//            core.changeButtonState(this.buttonMode, false);
+//        });
+//
+//        this.enableCollection();
     },
     /**
      * The width of the Entity.
@@ -2476,101 +2477,101 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
      * collision detection.
      * @return {Boolean} True, if a collision was detected.
      */
-    intersect: function(other) {
-        if (other instanceof enchant.Entity) {
-            return this._intersectOne(other);
-        } else if (typeof other === 'function' && other.collection) {
-            return _intersectBetweenClassAndInstance(other, this);
-        }
-        return false;
-    },
-    _intersectOne: function(other) {
-        if (this._dirty) {
-            this._updateCoordinate();
-        } if (other._dirty) {
-            other._updateCoordinate();
-        }
-        return this._offsetX < other._offsetX + other.width && other._offsetX < this._offsetX + this.width &&
-            this._offsetY < other._offsetY + other.height && other._offsetY < this._offsetY + this.height;
-    },
-    intersectStrict: function(other) {
-        if (other instanceof enchant.Entity) {
-            return this._intersectStrictOne(other);
-        } else if (typeof other === 'function' && other.collection) {
-            return _intersectStrictBetweenClassAndInstance(other, this);
-        }
-        return false;
-    },
-    _intersectStrictOne: function(other) {
-        if (this._dirty) {
-            this._updateCoordinate();
-        } if (other._dirty) {
-            other._updateCoordinate();
-        }
-        var rect1 = this.getOrientedBoundingRect(),
-            rect2 = other.getOrientedBoundingRect(),
-            lt1 = rect1.leftTop, rt1 = rect1.rightTop,
-            lb1 = rect1.leftBottom, rb1 = rect1.rightBottom,
-            lt2 = rect2.leftTop, rt2 = rect2.rightTop,
-            lb2 = rect2.leftBottom, rb2 = rect2.rightBottom,
-            ltx1 = lt1[0], lty1 = lt1[1], rtx1 = rt1[0], rty1 = rt1[1],
-            lbx1 = lb1[0], lby1 = lb1[1], rbx1 = rb1[0], rby1 = rb1[1],
-            ltx2 = lt2[0], lty2 = lt2[1], rtx2 = rt2[0], rty2 = rt2[1],
-            lbx2 = lb2[0], lby2 = lb2[1], rbx2 = rb2[0], rby2 = rb2[1],
-            t1 = [ rtx1 - ltx1, rty1 - lty1 ],
-            r1 = [ rbx1 - rtx1, rby1 - rty1 ],
-            b1 = [ lbx1 - rbx1, lby1 - rby1 ],
-            l1 = [ ltx1 - lbx1, lty1 - lby1 ],
-            t2 = [ rtx2 - ltx2, rty2 - lty2 ],
-            r2 = [ rbx2 - rtx2, rby2 - rty2 ],
-            b2 = [ lbx2 - rbx2, lby2 - rby2 ],
-            l2 = [ ltx2 - lbx2, lty2 - lby2 ],
-            cx1 = (ltx1 + rtx1 + lbx1 + rbx1) >> 2,
-            cy1 = (lty1 + rty1 + lby1 + rby1) >> 2,
-            cx2 = (ltx2 + rtx2 + lbx2 + rbx2) >> 2,
-            cy2 = (lty2 + rty2 + lby2 + rby2) >> 2,
-            i, j, poss1, poss2, dirs1, dirs2, pos1, pos2, dir1, dir2,
-            px1, py1, px2, py2, dx1, dy1, dx2, dy2, vx, vy, c, c1, c2;
-        if (t1[0] * (cy2 - lty1) - t1[1] * (cx2 - ltx1) > 0 &&
-            r1[0] * (cy2 - rty1) - r1[1] * (cx2 - rtx1) > 0 &&
-            b1[0] * (cy2 - rby1) - b1[1] * (cx2 - rbx1) > 0 &&
-            l1[0] * (cy2 - lby1) - l1[1] * (cx2 - lbx1) > 0) {
-            return true;
-        } else if (t2[0] * (cy1 - lty2) - t2[1] * (cx1 - ltx2) > 0 &&
-            r2[0] * (cy1 - rty2) - r2[1] * (cx1 - rtx2) > 0 &&
-            b2[0] * (cy1 - rby2) - b2[1] * (cx1 - rbx2) > 0 &&
-            l2[0] * (cy1 - lby2) - l2[1] * (cx1 - lbx2) > 0) {
-            return true;
-        } else {
-            poss1 = [ lt1, rt1, rb1, lb1 ];
-            poss2 = [ lt2, rt2, rb2, lb2 ];
-            dirs1 = [ t1, r1, b1, l1 ];
-            dirs2 = [ t2, r2, b2, l2 ];
-            for (i = 0; i < 4; i++) {
-                pos1 = poss1[i];
-                px1 = pos1[0]; py1 = pos1[1];
-                dir1 = dirs1[i];
-                dx1 = dir1[0]; dy1 = dir1[1];
-                for (j = 0; j < 4; j++) {
-                    pos2 = poss2[j];
-                    px2 = pos2[0]; py2 = pos2[1];
-                    dir2 = dirs2[j];
-                    dx2 = dir2[0]; dy2 = dir2[1];
-                    c = dx1 * dy2 - dy1 * dx2;
-                    if (c !== 0) {
-                        vx = px2 - px1;
-                        vy = py2 - py1;
-                        c1 = (vx * dy1 - vy * dx1) / c;
-                        c2 = (vx * dy2 - vy * dx2) / c;
-                        if (0 < c1 && c1 < 1 && 0 < c2 && c2 < 1) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-    },
+//    intersect: function(other) {
+//        if (other instanceof enchant.Entity) {
+//            return this._intersectOne(other);
+//        } else if (typeof other === 'function' && other.collection) {
+//            return _intersectBetweenClassAndInstance(other, this);
+//        }
+//        return false;
+//    },
+//    _intersectOne: function(other) {
+//        if (this._dirty) {
+//            this._updateCoordinate();
+//        } if (other._dirty) {
+//            other._updateCoordinate();
+//        }
+//        return this._offsetX < other._offsetX + other.width && other._offsetX < this._offsetX + this.width &&
+//            this._offsetY < other._offsetY + other.height && other._offsetY < this._offsetY + this.height;
+//    },
+//    intersectStrict: function(other) {
+//        if (other instanceof enchant.Entity) {
+//            return this._intersectStrictOne(other);
+//        } else if (typeof other === 'function' && other.collection) {
+//            return _intersectStrictBetweenClassAndInstance(other, this);
+//        }
+//        return false;
+//    },
+//    _intersectStrictOne: function(other) {
+//        if (this._dirty) {
+//            this._updateCoordinate();
+//        } if (other._dirty) {
+//            other._updateCoordinate();
+//        }
+//        var rect1 = this.getOrientedBoundingRect(),
+//            rect2 = other.getOrientedBoundingRect(),
+//            lt1 = rect1.leftTop, rt1 = rect1.rightTop,
+//            lb1 = rect1.leftBottom, rb1 = rect1.rightBottom,
+//            lt2 = rect2.leftTop, rt2 = rect2.rightTop,
+//            lb2 = rect2.leftBottom, rb2 = rect2.rightBottom,
+//            ltx1 = lt1[0], lty1 = lt1[1], rtx1 = rt1[0], rty1 = rt1[1],
+//            lbx1 = lb1[0], lby1 = lb1[1], rbx1 = rb1[0], rby1 = rb1[1],
+//            ltx2 = lt2[0], lty2 = lt2[1], rtx2 = rt2[0], rty2 = rt2[1],
+//            lbx2 = lb2[0], lby2 = lb2[1], rbx2 = rb2[0], rby2 = rb2[1],
+//            t1 = [ rtx1 - ltx1, rty1 - lty1 ],
+//            r1 = [ rbx1 - rtx1, rby1 - rty1 ],
+//            b1 = [ lbx1 - rbx1, lby1 - rby1 ],
+//            l1 = [ ltx1 - lbx1, lty1 - lby1 ],
+//            t2 = [ rtx2 - ltx2, rty2 - lty2 ],
+//            r2 = [ rbx2 - rtx2, rby2 - rty2 ],
+//            b2 = [ lbx2 - rbx2, lby2 - rby2 ],
+//            l2 = [ ltx2 - lbx2, lty2 - lby2 ],
+//            cx1 = (ltx1 + rtx1 + lbx1 + rbx1) >> 2,
+//            cy1 = (lty1 + rty1 + lby1 + rby1) >> 2,
+//            cx2 = (ltx2 + rtx2 + lbx2 + rbx2) >> 2,
+//            cy2 = (lty2 + rty2 + lby2 + rby2) >> 2,
+//            i, j, poss1, poss2, dirs1, dirs2, pos1, pos2, dir1, dir2,
+//            px1, py1, px2, py2, dx1, dy1, dx2, dy2, vx, vy, c, c1, c2;
+//        if (t1[0] * (cy2 - lty1) - t1[1] * (cx2 - ltx1) > 0 &&
+//            r1[0] * (cy2 - rty1) - r1[1] * (cx2 - rtx1) > 0 &&
+//            b1[0] * (cy2 - rby1) - b1[1] * (cx2 - rbx1) > 0 &&
+//            l1[0] * (cy2 - lby1) - l1[1] * (cx2 - lbx1) > 0) {
+//            return true;
+//        } else if (t2[0] * (cy1 - lty2) - t2[1] * (cx1 - ltx2) > 0 &&
+//            r2[0] * (cy1 - rty2) - r2[1] * (cx1 - rtx2) > 0 &&
+//            b2[0] * (cy1 - rby2) - b2[1] * (cx1 - rbx2) > 0 &&
+//            l2[0] * (cy1 - lby2) - l2[1] * (cx1 - lbx2) > 0) {
+//            return true;
+//        } else {
+//            poss1 = [ lt1, rt1, rb1, lb1 ];
+//            poss2 = [ lt2, rt2, rb2, lb2 ];
+//            dirs1 = [ t1, r1, b1, l1 ];
+//            dirs2 = [ t2, r2, b2, l2 ];
+//            for (i = 0; i < 4; i++) {
+//                pos1 = poss1[i];
+//                px1 = pos1[0]; py1 = pos1[1];
+//                dir1 = dirs1[i];
+//                dx1 = dir1[0]; dy1 = dir1[1];
+//                for (j = 0; j < 4; j++) {
+//                    pos2 = poss2[j];
+//                    px2 = pos2[0]; py2 = pos2[1];
+//                    dir2 = dirs2[j];
+//                    dx2 = dir2[0]; dy2 = dir2[1];
+//                    c = dx1 * dy2 - dy1 * dx2;
+//                    if (c !== 0) {
+//                        vx = px2 - px1;
+//                        vy = py2 - py1;
+//                        c1 = (vx * dy1 - vy * dx1) / c;
+//                        c2 = (vx * dy2 - vy * dx2) / c;
+//                        if (0 < c1 && c1 < 1 && 0 < c2 && c2 < 1) {
+//                            return true;
+//                        }
+//                    }
+//                }
+//            }
+//            return false;
+//        }
+//    },
     /**
      * Performs a collision detection based on distance from the Entity's central point.
      * @param {*} other An object like Entity, with properties x, y, width, height, which are used for the 
@@ -2579,19 +2580,19 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
      * The default distance is the average of both objects width and height.
      * @return {Boolean} True, if a collision was detected.
      */
-    within: function(other, distance) {
-        if (this._dirty) {
-            this._updateCoordinate();
-        } if (other._dirty) {
-            other._updateCoordinate();
-        }
-        if (distance == null) {
-            distance = (this.width + this.height + other.width + other.height) / 4;
-        }
-        var _;
-        return (_ = this._offsetX - other._offsetX + (this.width - other.width) / 2) * _ +
-            (_ = this._offsetY - other._offsetY + (this.height - other.height) / 2) * _ < distance * distance;
-    },
+//    within: function(other, distance) {
+//        if (this._dirty) {
+//            this._updateCoordinate();
+//        } if (other._dirty) {
+//            other._updateCoordinate();
+//        }
+//        if (distance == null) {
+//            distance = (this.width + this.height + other.width + other.height) / 4;
+//        }
+//        var _;
+//        return (_ = this._offsetX - other._offsetX + (this.width - other.width) / 2) * _ +
+//            (_ = this._offsetY - other._offsetY + (this.height - other.height) / 2) * _ < distance * distance;
+//    },
     /**
      * Enlarges or shrinks this Entity.
      * @param {Number} x Scaling factor on the x axis.
@@ -2677,81 +2678,81 @@ enchant.Entity = enchant.Class.create(enchant.Node, {
     },
     /**
      */
-    enableCollection: function() {
-        this.addEventListener('addedtoscene', this._addSelfToCollection);
-        this.addEventListener('removedfromscene', this._removeSelfFromCollection);
-        if (this.scene) {
-            this._addSelfToCollection();
-        }
-    },
+//    enableCollection: function() {
+//        this.addEventListener('addedtoscene', this._addSelfToCollection);
+//        this.addEventListener('removedfromscene', this._removeSelfFromCollection);
+//        if (this.scene) {
+//            this._addSelfToCollection();
+//        }
+//    },
     /**
      */
-    disableCollection: function() {
-        this.removeEventListener('addedtoscene', this._addSelfToCollection);
-        this.removeEventListener('removedfromscene', this._removeSelfFromCollection);
-        if (this.scene) {
-            this._removeSelfFromCollection();
-        }
-    },
-    _addSelfToCollection: function() {
-        if (this._isContainedInCollection) {
-            return;
-        }
-
-        var Constructor = this.getConstructor();
-        Constructor._collectionTarget.forEach(function(C) {
-            C.collection.push(this);
-        }, this);
-
-        this._isContainedInCollection = true;
-    },
-    _removeSelfFromCollection: function() {
-        if (!this._isContainedInCollection) {
-            return;
-        }
-
-        var Constructor = this.getConstructor();
-        Constructor._collectionTarget.forEach(function(C) {
-            var i = C.collection.indexOf(this);
-            if (i !== -1) {
-                C.collection.splice(i, 1);
-            }
-        }, this);
-
-        this._isContainedInCollection = false;
-    },
-    getBoundingRect: function() {
-        var w = this.width || 0;
-        var h = this.height || 0;
-        var mat = this._matrix;
-        var m11w = mat[0] * w, m12w = mat[1] * w,
-            m21h = mat[2] * h, m22h = mat[3] * h,
-            mdx = mat[4], mdy = mat[5];
-        var xw = [ mdx, m11w + mdx, m21h + mdx, m11w + m21h + mdx ].sort(function(a, b) { return a - b; });
-        var yh = [ mdy, m12w + mdy, m22h + mdy, m12w + m22h + mdy ].sort(function(a, b) { return a - b; });
-
-        return {
-            left: xw[0],
-            top: yh[0],
-            width: xw[3] - xw[0],
-            height: yh[3] - yh[0]
-        };
-    },
-    getOrientedBoundingRect: function() {
-        var w = this.width || 0;
-        var h = this.height || 0;
-        var mat = this._matrix;
-        var m11w = mat[0] * w, m12w = mat[1] * w,
-            m21h = mat[2] * h, m22h = mat[3] * h,
-            mdx = mat[4], mdy = mat[5];
-
-        return {
-            leftTop: [ mdx, mdy ],
-            rightTop: [ m11w + mdx, m12w + mdy ],
-            leftBottom: [ m21h + mdx, m22h + mdy ],
-            rightBottom: [ m11w + m21h + mdx, m12w + m22h + mdy ]
-        };
-    },
+//    disableCollection: function() {
+//        this.removeEventListener('addedtoscene', this._addSelfToCollection);
+//        this.removeEventListener('removedfromscene', this._removeSelfFromCollection);
+//        if (this.scene) {
+//            this._removeSelfFromCollection();
+//        }
+//    },
+//    _addSelfToCollection: function() {
+//        if (this._isContainedInCollection) {
+//            return;
+//        }
+//
+//        var Constructor = this.getConstructor();
+//        Constructor._collectionTarget.forEach(function(C) {
+//            C.collection.push(this);
+//        }, this);
+//
+//        this._isContainedInCollection = true;
+//    },
+//    _removeSelfFromCollection: function() {
+//        if (!this._isContainedInCollection) {
+//            return;
+//        }
+//
+//        var Constructor = this.getConstructor();
+//        Constructor._collectionTarget.forEach(function(C) {
+//            var i = C.collection.indexOf(this);
+//            if (i !== -1) {
+//                C.collection.splice(i, 1);
+//            }
+//        }, this);
+//
+//        this._isContainedInCollection = false;
+//    },
+//    getBoundingRect: function() {
+//        var w = this.width || 0;
+//        var h = this.height || 0;
+//        var mat = this._matrix;
+//        var m11w = mat[0] * w, m12w = mat[1] * w,
+//            m21h = mat[2] * h, m22h = mat[3] * h,
+//            mdx = mat[4], mdy = mat[5];
+//        var xw = [ mdx, m11w + mdx, m21h + mdx, m11w + m21h + mdx ].sort(function(a, b) { return a - b; });
+//        var yh = [ mdy, m12w + mdy, m22h + mdy, m12w + m22h + mdy ].sort(function(a, b) { return a - b; });
+//
+//        return {
+//            left: xw[0],
+//            top: yh[0],
+//            width: xw[3] - xw[0],
+//            height: yh[3] - yh[0]
+//        };
+//    },
+//    getOrientedBoundingRect: function() {
+//        var w = this.width || 0;
+//        var h = this.height || 0;
+//        var mat = this._matrix;
+//        var m11w = mat[0] * w, m12w = mat[1] * w,
+//            m21h = mat[2] * h, m22h = mat[3] * h,
+//            mdx = mat[4], mdy = mat[5];
+//
+//        return {
+//            leftTop: [ mdx, mdy ],
+//            rightTop: [ m11w + mdx, m12w + mdy ],
+//            leftBottom: [ m21h + mdx, m22h + mdy ],
+//            rightBottom: [ m11w + m21h + mdx, m12w + m22h + mdy ]
+//        };
+//    },
     getConstructor: function() {
         return Object.getPrototypeOf(this).constructor;
     }
@@ -2768,8 +2769,8 @@ var _collectizeConstructor = function(Constructor) {
     } else {
         Constructor._collectionTarget = [];
     }
-    Constructor.intersect = _staticIntersect;
-    Constructor.intersectStrict = _staticIntersectStrict;
+//    Constructor.intersect = _staticIntersect;
+//    Constructor.intersectStrict = _staticIntersectStrict;
     Constructor.collection = [];
     Constructor._collective = true;
 };
@@ -2942,7 +2943,6 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
                         this._style['background-position'] =
                             -this._frameLeft + 'px ' +
                             -this._frameTop + 'px';
-                    } else if (this._image._element) {
                     }
                 }
             };
@@ -2954,7 +2954,6 @@ enchant.Sprite = enchant.Class.create(enchant.Entity, {
                         this._style['background-position'] =
                             -this._frameLeft + 'px ' +
                             -this._frameTop + 'px';
-                    } else if (this._image._element) {
                     }
                 }
             };
@@ -4874,7 +4873,7 @@ enchant.LoadingScene = enchant.Class.create(enchant.Scene, {
         var barHeight = this.width * 0.05 | 0;
         var border = barWidth * 0.03 | 0;
         var bar = new enchant.Sprite(barWidth, barHeight);
-        bar.disableCollection();
+//        bar.disableCollection();
         bar.x = (this.width - barWidth) / 2;
         bar.y = (this.height - barHeight) / 2;
         var image = new enchant.Surface(barWidth, barHeight);
@@ -5642,7 +5641,7 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
         if (currentTime === this.duration) {
             return;
         }
-        if (this.src.stop != null) {
+        if (this.src.stop) {
             this.src.stop(0);
         } else {
             this.src.noteOff(0);
@@ -5654,7 +5653,7 @@ enchant.WebAudioSound = enchant.Class.create(enchant.EventTarget, {
      * Stop playing.
      */
     stop: function() {
-        if (this.src.stop != null) {
+        if (this.src.stop) {
             this.src.stop(0);
         } else {
             this.src.noteOff(0);

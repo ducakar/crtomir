@@ -19,7 +19,7 @@ var PlayerController = Class(null, {
 
       if (inputAction && !this.animMode && this.hasWeapon) {
         this.animMode = 2;
-        this.actionSound.play();
+        this.actionSound.clone().play();
       }
       if (game.input.left && !game.input.right) {
         this.vx = inputAction ? 0 : -this.moveStep;
@@ -42,12 +42,21 @@ var PlayerController = Class(null, {
         var tx = this.entity.px + Math.sgn(this.vx);
         var ty = this.entity.py + Math.sgn(this.vy);
 
-        if (0 <= tx && tx < orbis.width && 0 <= ty && ty < orbis.height && !orbis.isSolid(tx, ty)) {
-          this.entity.moveTo(tx, ty);
-        }
-        else {
+        if (tx < 0 || orbis.width <= tx || ty < 0 || orbis.height <= ty) {
           this.vx = 0;
           this.vy = 0;
+        }
+        else if (orbis.isSolid(tx, ty)) {
+          this.vx = 0;
+          this.vy = 0;
+
+          var device = orbis.deviceAt(tx, ty);
+          if (device) {
+            device.activate(this.entity);
+          }
+        }
+        else {
+          this.entity.fieldMoveTo(tx, ty);
         }
       }
     }
@@ -67,8 +76,8 @@ var PlayerController = Class(null, {
         this.animFrame = (this.animFrame + 1) % 3;
       }
 
-      if ((this.vx && (this.entity.x - this.entity.OFFSET_X) % 16 === 0) ||
-          (this.vy && (this.entity.y - this.entity.OFFSET_Y) % 16 === 0))
+      if ((this.vx && (this.entity.x - this.entity.OFFSET_X) % Field.SIZE === 0) ||
+          (this.vy && (this.entity.y - this.entity.OFFSET_Y) % Field.SIZE === 0))
       {
         this.animFrame = 1;
         this.vx = 0;
@@ -104,16 +113,16 @@ var PlayerController = Class(null, {
     var controller = this;
 
     entity.frame = this.direction * 9 + this.animFrame;
-    entity.addEventListener(enchant.Event.ENTER_FRAME, function() {
+    entity.onenterframe = function() {
       controller.update();
-    });
+    };
 
     game.rootScene.addChild(this.pad);
   },
   destroy: function() {
     game.rootScene.removeChild(this.pad);
 
-    this.entity.removeEventListener(enchant.Event.ENTER_FRAME, this.update);
+    delete this.entity.onenterframe;
     this.entity.frame = this.direction * 9 + this.animFrame;
     this.entity.realign();
   }

@@ -80,16 +80,16 @@ enchant.ui.Pad = enchant.Class.create(enchant.Sprite, {
         y -= this.height / 2;
         var input = { left: false, right: false, up: false, down: false };
         if (x * x + y * y > 200) {
-            if (x < 0 && y < x * x * 0.1 && y > x * x * -0.1) {
+            if (x < 0 && x*x > y*y) {
                 input.left = true;
             }
-            if (x > 0 && y < x * x * 0.1 && y > x * x * -0.1) {
+            if (x > 0 && x*x > y*y) {
                 input.right = true;
             }
-            if (y < 0 && x < y * y * 0.1 && x > y * y * -0.1) {
+            if (y < 0 && y*y > x*x) {
                 input.up = true;
             }
-            if (y > 0 && x < y * y * 0.1 && x > y * y * -0.1) {
+            if (y > 0 && y*y > x*x) {
                 input.down = true;
             }
         }
@@ -454,7 +454,7 @@ enchant.ui.Button.DEFAULT_THEME = {
             background: { type: 'linear-gradient', start: '#fff', end:'#ccc' },
             border: { color: '#999', width: 1, type: 'solid' },
             textShadow: { offsetX: 0, offsetY: 1, blur: 0, color: '#fff' },
-            boxShadow: { offsetX: 0, offsetY: 1, blur: 0, color: 'rgba(0, 0, 0, 1)' },
+            boxShadow: { offsetX: 0, offsetY: 1, blur: 0, color: 'rgba(0, 0, 0, 1)' }
         },
         active: {
             color: '#333',

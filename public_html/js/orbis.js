@@ -14,11 +14,34 @@ var Field = {
 };
 
 var Entity = {
-  moveTo: function(px, py) {
+  push: function(actor) {
+    var dx = this.px - actor.px;
+    var dy = this.py - actor.py;
+    var px = dx < 0 ? this.px - 1 : dx > 0 ? this.px + 1 : this.px;
+    var py = dy < 0 ? this.py - 1 : dy > 0 ? this.py + 1 : this.py;
+
+    if (!(orbis.fieldFlags[px][py] & Field.SOLID)) {
+      this.fieldMoveTo(px, py);
+
+      var vx = dx < 0 ? -2 : dx > 0 ? +2 : 0;
+      var vy = dy < 0 ? -2 : dy > 0 ? +2 : 0;
+
+      this.onenterframe = function() {
+        this.moveBy(vx, vy);
+
+        if ((vx && (this.x - (this.OFFSET_X || 0)) % Field.SIZE === 0) ||
+            (vy && (this.y - (this.OFFSET_Y || 0)) % Field.SIZE === 0))
+        {
+          delete this.onenterframe;
+        }
+      };
+    }
+  },
+  fieldMoveTo: function(px, py) {
     var fieldFlags = orbis.fieldFlags;
     var fieldEnts = orbis[this.FIELD];
 
-    assert(fieldFlags[this.px][this.py] & Field.SOLID, "Moving to occupied field");
+    assert(!(fieldFlags[px][py] & Field.SOLID), "Moving to occupied field");
 
     fieldFlags[this.px][this.py] &= ~this.FLAGS;
     fieldFlags[px][py] |= this.FLAGS;
@@ -65,18 +88,24 @@ var Entity = {
 
     orbis.layer[this.ARRAY].removeChild(this);
   },
-  init: function(image) {
+  init: function(image, frame) {
+    var array = orbis[this.ARRAY];
+
     this.visible = false;
     this.image = image;
-    this.array = orbis[this.ARRAY];
-    this.array.push(this);
+    this.frame = frame || 0;
+
+    array.push(this);
   },
   destroy: function() {
+    var array = orbis[this.ARRAY];
+
     assert(this.px === -1 && this.py === -1, "Destroying positioned entity");
 
     this.visible = false;
     this.image = null;
-    this.array.splice(this.array.indexOf(this), 1);
+
+    array.splice(array.indexOf(this), 1);
   }
 };
 
@@ -88,12 +117,12 @@ var Char = Class(new enchant.Sprite(Field.SIZE * 2, Field.SIZE * 2), {
   OFFSET_Y: -12,
   px: -1,
   py: -1,
-  array: null,
-  moveTo: Entity.moveTo,
+  fieldMoveTo: Entity.fieldMoveTo,
   realign: Entity.realign,
   position: Entity.position,
   unposition: Entity.unposition,
-  init: Entity.init
+  init: Entity.init,
+  destroy: Entity.destroy
 });
 
 var Item = Class(new enchant.Sprite(Field.SIZE, Field.SIZE), {
@@ -102,12 +131,27 @@ var Item = Class(new enchant.Sprite(Field.SIZE, Field.SIZE), {
   ARRAY: "items",
   px: -1,
   py: -1,
-  array: null,
-  moveTo: Entity.moveTo,
   realign: Entity.realign,
   position: Entity.position,
   unposition: Entity.unposition,
-  init: Entity.init
+  init: Entity.init,
+  destroy: Entity.destroy
+});
+
+var Device = Class(new enchant.Sprite(Field.SIZE, Field.SIZE), {
+  FLAGS: Field.DEVICE | Field.SOLID,
+  FIELD: "fieldDevices",
+  ARRAY: "devices",
+  px: -1,
+  py: -1,
+  activate: Entity.push,
+  moveTo: Entity.moveTo,
+  fieldMoveTo: Entity.fieldMoveTo,
+  realign: Entity.realign,
+  position: Entity.position,
+  unposition: Entity.unposition,
+  init: Entity.init,
+  destroy: Entity.destroy
 });
 
 var Orbis = Class(null, {
@@ -174,8 +218,13 @@ var Orbis = Class(null, {
     this.map.foreground.image = tilesImage;
     this.map.foreground.loadData.apply(this.map.foreground, layers.foreground);
 
+    this.layer.background = new enchant.Group();
     this.layer.chars = new enchant.Group();
     this.layer.items = new enchant.Group();
     this.layer.devices = new enchant.Group();
+    this.layer.foreground = new enchant.Group();
+
+    this.layer.background.addChild(this.map.background);
+    this.layer.foreground.addChild(this.map.foreground);
   }
 });
