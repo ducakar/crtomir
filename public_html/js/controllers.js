@@ -13,7 +13,7 @@ var PlayerController = Class(null, {
   animFrame: 1,
   actionSound: null,
   pad: null,
-  update: function() {
+  update: function () {
     if (this.isEnabled && !this.vx && !this.vy) {
       var inputAction = game.input.action && (!this.pad || !this.pad.isTouched());
 
@@ -85,7 +85,7 @@ var PlayerController = Class(null, {
       }
     }
   },
-  enable: function(value) {
+  enable: function (value) {
     if (!this.isEnabled && value) {
       this.pad.visible = true;
     }
@@ -94,13 +94,13 @@ var PlayerController = Class(null, {
     }
     this.isEnabled = value;
   },
-  init: function(entity) {
+  init: function (entity) {
     this.entity = entity;
     this.actionSound = game.assets["data/jump.wav"];
     this.pad = enchant.ui.Pad();
     this.pad.x = 0;
     this.pad.y = game.height - 100;
-    this.pad.isTouched = function() {
+    this.pad.isTouched = function () {
       for (var dir in this.input) {
         if (this.input[dir]) {
           return true;
@@ -113,13 +113,13 @@ var PlayerController = Class(null, {
     var controller = this;
 
     entity.frame = this.direction * 9 + this.animFrame;
-    entity.onenterframe = function() {
+    entity.onenterframe = function () {
       controller.update();
     };
 
     game.rootScene.addChild(this.pad);
   },
-  destroy: function() {
+  destroy: function () {
     game.rootScene.removeChild(this.pad);
 
     delete this.entity.onenterframe;

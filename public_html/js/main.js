@@ -6,7 +6,7 @@ enchant();
 
 var game = null;
 
-window.onload = function() {
+window.onload = function () {
   game = new enchant.Core(480, 320);
   game.preload("data/map1.png", "data/chara0.png", "data/chara5.png", "data/jump.wav");
   game.keybind(87, "up");
@@ -14,14 +14,14 @@ window.onload = function() {
   game.keybind(65, "left");
   game.keybind(68, "right");
   game.keybind(32, "action");
-  game.rootScene.addEventListener(enchant.Event.TOUCH_START, function() {
+  game.rootScene.addEventListener(enchant.Event.TOUCH_START, function () {
     game.changeButtonState("action", true);
   });
-  game.rootScene.addEventListener(enchant.Event.TOUCH_END, function() {
+  game.rootScene.addEventListener(enchant.Event.TOUCH_END, function () {
     game.changeButtonState("action", false);
   });
 
-  game.onload = function() {
+  game.onload = function () {
     orbis = new Orbis(game.assets["data/map1.png"], LAYERS);
 
     var stage = new enchant.Group();
@@ -40,7 +40,7 @@ window.onload = function() {
 
     game.rootScene.addChild(stage);
     game.rootScene.addChild(lifeLabel);
-    game.onexitframe = function() {
+    game.onexitframe = function () {
       var x = Math.min((game.width - 16) / 2 - player.x, 0);
       var y = Math.min((game.height - 16) / 2 - player.y, 0);
       x = Math.max(game.width, x + orbis.pixelWidth) - orbis.pixelWidth;

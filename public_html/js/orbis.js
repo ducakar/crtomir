@@ -14,7 +14,7 @@ var Field = {
 };
 
 var Entity = {
-  push: function(actor) {
+  push: function (actor) {
     var dx = this.px - actor.px;
     var dy = this.py - actor.py;
     var px = dx < 0 ? this.px - 1 : dx > 0 ? this.px + 1 : this.px;
@@ -26,7 +26,7 @@ var Entity = {
       var vx = dx < 0 ? -2 : dx > 0 ? +2 : 0;
       var vy = dy < 0 ? -2 : dy > 0 ? +2 : 0;
 
-      this.onenterframe = function() {
+      this.onenterframe = function () {
         this.moveBy(vx, vy);
 
         if ((vx && (this.x - (this.OFFSET_X || 0)) % Field.SIZE === 0) ||
@@ -37,7 +37,7 @@ var Entity = {
       };
     }
   },
-  fieldMoveTo: function(px, py) {
+  fieldMoveTo: function (px, py) {
     var fieldFlags = orbis.fieldFlags;
     var fieldEnts = orbis[this.FIELD];
 
@@ -51,11 +51,11 @@ var Entity = {
     this.px = px;
     this.py = py;
   },
-  realign: function() {
+  realign: function () {
     this.x = this.px * Field.SIZE + (this.OFFSET_X || 0);
     this.y = this.py * Field.SIZE + (this.OFFSET_Y || 0);
   },
-  position: function(px, py) {
+  position: function (px, py) {
     var fieldFlags = orbis.fieldFlags;
     var fieldEnts = orbis[this.FIELD];
 
@@ -71,7 +71,7 @@ var Entity = {
 
     orbis.layer[this.ARRAY].addChild(this);
   },
-  unposition: function() {
+  unposition: function () {
     var fieldFlags = orbis.fieldFlags;
     var fieldEnts = orbis[this.FIELD];
 
@@ -88,7 +88,7 @@ var Entity = {
 
     orbis.layer[this.ARRAY].removeChild(this);
   },
-  init: function(image, frame) {
+  init: function (image, frame) {
     var array = orbis[this.ARRAY];
 
     this.visible = false;
@@ -97,7 +97,7 @@ var Entity = {
 
     array.push(this);
   },
-  destroy: function() {
+  destroy: function () {
     var array = orbis[this.ARRAY];
 
     assert(this.px === -1 && this.py === -1, "Destroying positioned entity");
@@ -173,19 +173,19 @@ var Orbis = Class(null, {
     items: null,
     devices: null
   },
-  isSolid: function(px, py) {
+  isSolid: function (px, py) {
     return this.fieldFlags[px][py] & Field.SOLID;
   },
-  charAt: function(px, py) {
+  charAt: function (px, py) {
     return this.fieldChars[px][py];
   },
-  itemAt: function(px, py) {
+  itemAt: function (px, py) {
     return this.fieldItems[px][py];
   },
-  deviceAt: function(px, py) {
+  deviceAt: function (px, py) {
     return this.fieldDevices[px][py];
   },
-  init: function(tilesImage, layers) {
+  init: function (tilesImage, layers) {
     this.width = layers.collision[0].length;
     this.height = layers.collision.length;
     this.pixelWidth = this.width * Field.SIZE;
